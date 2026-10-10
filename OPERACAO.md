@@ -56,13 +56,21 @@ Os dados do MariaDB ficam no volume Docker `kotatsu-db` por padrão. Para acompa
 
 ## Levar contas e dados para outra máquina
 
-Uma instalação nova começa sem contas, favoritos ou histórico. Para migrar os dados, faça um dump no servidor antigo e transfira-o por um canal protegido. Guarde o arquivo fora do repositório:
+Uma instalação nova começa sem contas, favoritos ou histórico. Para migrar os dados, faça um dump no servidor de origem e transfira-o por um canal protegido. Guarde o arquivo fora do repositório:
 
 ```sh
 docker compose exec -T db sh -c 'mariadb-dump --user="$MARIADB_USER" --password="$MARIADB_PASSWORD" "$MARIADB_DATABASE"' > /caminho/seguro/kotatsu-sync.sql
 ```
 
-Na máquina nova, clone o fork, crie e configure o `.env` como na seção anterior. Inicie o banco, importe o dump e então inicie o servidor:
+Na máquina de destino, clone a branch `futon` ou atualize o checkout existente. Configure o `.env` com o endereço e as credenciais do destino, como na seção anterior:
+
+Se o banco antigo do destino pode ser descartado, execute o próximo comando **somente na máquina de destino**, dentro da pasta do Compose. Ele apaga os volumes e os dados antigos desse projeto; não o execute na origem:
+
+```sh
+docker compose down -v
+```
+
+Em seguida, importe o dump no banco novo:
 
 ```sh
 docker compose up -d db
