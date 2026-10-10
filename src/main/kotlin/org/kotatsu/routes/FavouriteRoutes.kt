@@ -8,6 +8,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.kotatsu.model.favourite.FavouritesPackage
 import org.kotatsu.plugins.currentUser
+import org.kotatsu.plugins.toFutonSyncResponseJson
+import org.kotatsu.resources.deltaFrom
 import org.kotatsu.resources.setFavouritesSynchronized
 import org.kotatsu.resources.syncFavourites
 
@@ -20,7 +22,7 @@ fun Route.favouriteRoutes() {
                 return@get
             }
             val response = syncFavourites(user, null)
-            call.respond(response)
+            call.respond(response.toFutonSyncResponseJson())
         }
         post<FavouritesPackage>("/resource/favourites") { request ->
             val user = call.currentUser
@@ -35,10 +37,11 @@ fun Route.favouriteRoutes() {
                 result
             }
 
-            if (response.contentEquals(request)) {
+            val delta = response.deltaFrom(request)
+            if (delta.favouriteCategories.isEmpty() && delta.favourites.isEmpty()) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
-                call.respond(response)
+                call.respond(delta.toFutonSyncResponseJson())
             }
         }
     }

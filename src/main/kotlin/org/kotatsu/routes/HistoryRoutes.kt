@@ -9,6 +9,8 @@ import kotlinx.coroutines.withContext
 import org.kotatsu.database
 import org.kotatsu.model.history.HistoryPackage
 import org.kotatsu.plugins.currentUser
+import org.kotatsu.plugins.toFutonSyncResponseJson
+import org.kotatsu.resources.deltaFrom
 import org.kotatsu.resources.setHistorySynchronized
 import org.kotatsu.resources.syncHistory
 import org.ktorm.database.TransactionIsolation
@@ -26,7 +28,7 @@ fun Route.historyRoutes() {
                 syncHistory(user, null)
             }
 
-            call.respond(response)
+            call.respond(response.toFutonSyncResponseJson())
         }
         post<HistoryPackage>("/resource/history") { request ->
             val user = call.currentUser
@@ -41,10 +43,11 @@ fun Route.historyRoutes() {
                 result
             }
 
-            if (response.contentEquals(request)) {
+            val delta = response.deltaFrom(request)
+            if (delta.history.isEmpty()) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
-                call.respond(response)
+                call.respond(delta.toFutonSyncResponseJson())
             }
         }
     }

@@ -19,6 +19,10 @@ Synchronization is needed to store your collection of favorites, history and cat
 - Another device connects and syncs with the service;
 - The uploaded data appears on the device connected to the account.
 
+## Futon compatibility
+
+This fork adjusts synchronization responses for Futon 9.8.2: it removes manga fields the client cannot deserialize and sends only changed records after a POST. The client also needs its matching local database fix; server changes alone are not sufficient. See the [Portuguese installation and migration guide](OPERACAO.md) for deployment, backups, and the Futon-specific requirements.
+
 ## Installation
 
 > [!TIP]
